@@ -32,10 +32,11 @@ app.post('/users', function (req, res) {
 })
 
 app.get('/users/:userId', function (req, res) {
+  const { userId } = req.params.userId;
   const params = {
     TableName: USERS_TABLE,
     Key: {
-      userId: req.params.userId,
+      userId: userId,
     },
   }
   dynamoDb.get(params, (error, result) => {
@@ -49,6 +50,23 @@ app.get('/users/:userId', function (req, res) {
     } else {
       res.status(404).json({ error: `User ${userId} not found` });
     }
+  })
+})
+
+app.delete('/users/:userId', function (req, res) {
+  const { userId } = req.params;
+  const params = {
+    TableName: USERS_TABLE,
+    Key: {
+      userId: userId,
+    },
+  }
+  dynamoDb.delete(params, (error, result) => {
+    if (error) {
+      console.log(error);
+      res.status(400).json({ error: `Could not delete user ${userId}` });
+    }
+    res.json({ userId: userId });
   })
 })
 
