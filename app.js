@@ -1,3 +1,4 @@
+
 const serverless = require('serverless-http');
 const express = require('express');
 const app = express();
@@ -51,6 +52,18 @@ app.get('/users/:userId', function (req, res) {
       res.status(404).json({ error: `User ${userId} not found` });
     }
   })
+})
+
+app.get('/users', async (req, res) => {
+  const params = {
+    TableName: USERS_TABLE,
+  };
+  try {
+    const data = await dynamoDb.scan(params).promise();
+    return data;
+  } catch (err) {
+    return err;
+  }
 })
 
 app.delete('/users/:userId', function (req, res) {
