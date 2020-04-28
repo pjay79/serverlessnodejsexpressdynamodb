@@ -2,6 +2,17 @@ service: serverless-example-dynamodb
 
 custom:
   tableName: 'users-table-${self:provider.stage}'
+  dynamodb:
+    stages:
+      - dev
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      seed: true
+      convertEmptyValues: true
 
 provider:
   name: aws
@@ -57,3 +68,4 @@ resources:
 plugins:
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-dynamodb-local
