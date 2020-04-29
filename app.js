@@ -15,7 +15,19 @@ app.get('/', async (req, res, next) => {
  res.status(200).send('Hello Serverless!')
 })
 
-app.post('/users/', function (req, res) {
+app.get('/users', (req, res) => {
+  const params = {
+    TableName: USERS_TABLE,
+  }
+  dynamoDb.scan(params, (err, data) => {
+    if (err) {
+      return res.status(404).json(err);
+    }
+    return res.status(200).json(data.Items);
+  })
+})
+
+app.post('/users/', (req, res) => {
   const { userId, name } = req.body;
   const params = {
     TableName: USERS_TABLE,
@@ -26,13 +38,13 @@ app.post('/users/', function (req, res) {
   };
   dynamoDb.put(params, (err) => {
     if (err) {
-      return res.status(400).json(error);
+      return res.status(400).json(err);
     }
     return res.status(200).json({ userId, name });
   })
 })
 
-app.get('/users/:userId', function (req, res) {
+app.get('/users/:userId', (req, res) => {
   const params = {
     TableName: USERS_TABLE,
     Key: {
@@ -41,29 +53,34 @@ app.get('/users/:userId', function (req, res) {
   }
   dynamoDb.get(params, (err, data) => {
     if (err) {
-      return res.status(400).json(error);
+      return res.status(400).json(err);
     }
     if (data.Item) {
       return res.status(200).json(data.Item);
     } else {
-      return res.status(404).json(error);
+      return res.status(404).json(err);
     }
   })
 })
 
-app.get('/users', function (req, res) {
+app.put('/users/:userId', (req, res) => {
   const params = {
     TableName: USERS_TABLE,
+    Key: {
+      userId: req.params.userId,
+      UpdateExpression: 'set name = :newname',
+      ExpressionAttributeValues: { ':newname': req.body.name }
+    },
   }
-  dynamoDb.scan(params, (err, data) => {
+  dynamoDb.update(params, (err, data) => {
     if (err) {
-      return res.status(404).json(error);
+      return res.status(400).json(err);
     }
-    return res.status(200).json(data.Items);
+    return res.status(200).json(data);
   })
 })
 
-app.delete('/users/:userId', function (req, res) {
+app.delete('/users/:userId', (req, res) => {
   const params = {
     TableName: USERS_TABLE,
     Key: {
@@ -72,7 +89,7 @@ app.delete('/users/:userId', function (req, res) {
   }
   dynamoDb.delete(params, (err, data) => {
     if (err) {
-      return res.status(500).json(error);
+      return res.status(500).json(err);
     }
     return res.status(200).json({ userId: req.params.userId }); 
   })
