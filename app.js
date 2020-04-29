@@ -63,4 +63,19 @@ app.get('/users', function (req, res) {
   })
 })
 
+app.delete('/users/:userId', function (req, res) {
+  const params = {
+    TableName: USERS_TABLE,
+    Key: {
+      userId: req.params.userId,
+    },
+  }
+  dynamoDb.delete(params, (err, data) => {
+    if (err) {
+      return res.status(500).json(error);
+    }
+    return res.status(200).json({ userId: req.params.userId }); 
+  })
+})
+
 module.exports.server = serverless(app);
