@@ -9,6 +9,7 @@ const dynamoDb = new AWS.DynamoDB.DocumentClient();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 
 app.get('/', async (req, res, next) => { 
  res.status(200).send('Hello Serverless!')
@@ -23,12 +24,11 @@ app.post('/users/', function (req, res) {
       name: name,
     },
   };
-  dynamoDb.put(params, (error) => {
-    if (error) {
-      console.log(error);
-      res.status(400).json({ error: `Could not create user ${name}` });
+  dynamoDb.put(params, (err) => {
+    if (err) {
+      return res.status(400).json(error);
     }
-    res.json({ userId, name });
+    return res.status(200).json({ userId, name });
   })
 })
 
@@ -39,17 +39,27 @@ app.get('/users/:userId', function (req, res) {
       userId: req.params.userId,
     },
   }
-  dynamoDb.get(params, (error, result) => {
-    if (error) {
-      console.log(error);
-      res.status(400).json({ error: `Could not get user ${req.params.userId}` });
+  dynamoDb.get(params, (err, data) => {
+    if (err) {
+      return res.status(400).json(error);
     }
-    if (result.Item) {
-      const { userId, name } = result.Item;
-      res.json({ userId, name });
+    if (data.Item) {
+      return res.status(200).json(data.Item);
     } else {
-      res.status(404).json({ error: `User ${req.params.userId} not found` });
+      return res.status(404).json(error);
     }
+  })
+})
+
+app.get('/users', function (req, res) {
+  const params = {
+    TableName: USERS_TABLE,
+  }
+  dynamoDb.scan(params, (err, data) => {
+    if (err) {
+      return res.status(404).json(error);
+    }
+    return res.status(200).json(data.Items);
   })
 })
 
