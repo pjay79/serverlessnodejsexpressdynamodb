@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-app.get('/', async (req, res, next) => { 
+app.get('/', async (req, res) => { 
  res.status(200).send('Hello Serverless!')
 })
 
@@ -40,7 +40,12 @@ app.post('/users/', (req, res) => {
     if (err) {
       return res.status(400).json(err);
     }
-    return res.status(200).json({ userId, name });
+    return res.status(200).json({
+      status: 200,
+      message: 'User added',
+      userId,
+      name,
+    });
   })
 })
 
@@ -56,7 +61,11 @@ app.get('/users/:userId', (req, res) => {
       return res.status(400).json(err);
     }
     if (data.Item) {
-      return res.status(200).json(data.Item);
+      return res.status(200).json({
+        status: 200,
+        message: 'OK',
+        data: data.Item,
+      });
     } else {
       return res.status(404).json(err);
     }
@@ -83,8 +92,8 @@ app.put('/users/:userId', (req, res) => {
     }
     return res.status(200).json({
       status: 200,
+      message: `Update successful`,
       userId: req.params.userId,
-      message: `Update successful`
     });
   })
 })
@@ -100,7 +109,11 @@ app.delete('/users/:userId', (req, res) => {
     if (err) {
       return res.status(500).json(err);
     }
-    return res.status(200).json({ userId: req.params.userId }); 
+    return res.status(200).json({
+      status: 200,
+      message: `Delete successful`,
+      userId: req.params.userId,
+    }); 
   })
 })
 
