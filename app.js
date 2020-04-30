@@ -68,15 +68,24 @@ app.put('/users/:userId', (req, res) => {
     TableName: USERS_TABLE,
     Key: {
       userId: req.params.userId,
-      UpdateExpression: 'set name = :newname',
-      ExpressionAttributeValues: { ':newname': req.body.name }
     },
+    UpdateExpression: 'set #newname = :newname',
+    ExpressionAttributeValues: {
+      ':newname': req.body.name,
+    },
+    ExpressionAttributeNames: {
+      "#newname": "name",
+    }
   }
   dynamoDb.update(params, (err, data) => {
     if (err) {
       return res.status(400).json(err);
     }
-    return res.status(200).json(data);
+    return res.status(200).json({
+      status: 200,
+      userId: req.params.userId,
+      message: `Update successful`
+    });
   })
 })
 
